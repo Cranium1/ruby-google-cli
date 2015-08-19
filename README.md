@@ -1,6 +1,6 @@
 # // Ruby-Google-cli
 
-Contributers = Cranium1: github.com/Cranium1 // Samj: github.com/Samueljoli
+Contributors = Cranium1: github.com/Cranium1 // Samj: github.com/Samueljoli
 
 ## Description
 Make Google search queries from the command line.
