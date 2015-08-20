@@ -1,5 +1,7 @@
 class Application
   def initialize(config={}, options={})
+    WindowControl::lock_window
+
     @options = options
     @config = config
 
@@ -26,5 +28,7 @@ class Application
     while true
       @control.show_single_key
     end
+  ensure
+    WindowControl::unlock_window
   end
 end

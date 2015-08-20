@@ -1,4 +1,12 @@
 class WindowControl
+  def self.lock_window
+    print "\033[?1049h\033[H"
+  end
+
+  def self.unlock_window
+    print "\033[?1049l"
+  end
+
   def initialize(results)
     @index = 0
     @results = results
@@ -55,15 +63,11 @@ class Interface
  end
 
   def self.prompt_user
+    google = "G".blue+"o".red+"o".yellow+"g".blue+"l".green+"e".red
     system "clear" or system "cls"
     puts nil
     puts nil
-    puts "          Google Cli"
-    puts nil
-    puts "            V.01"
-    puts nil
-    puts "      Enter Search Query:"
-    puts nil
-    puts nil
+    puts "      #{google} Cli V.01"
+    print "      Enter Search Query"+" >> ".red
   end
 end
