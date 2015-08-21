@@ -5,6 +5,7 @@ class Application
 
     self.app_start
     self.app_loop
+    self.app_end
   end
 
   def app_start
