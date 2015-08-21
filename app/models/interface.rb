@@ -1,18 +1,12 @@
-class WindowControl
-  def self.lock_window
+class UserInput
+  def lock_window
     print "\033[?1049h\033[H"
   end
 
-  def self.unlock_window
+  def unlock_window
     print "\033[?1049l"
   end
 
-  def initialize(results)
-    @index = 0
-    @results = results
-    Interface::render_page(@results, @index)
-  end
-  
   def read_char
     STDIN.echo = false
     STDIN.raw!
@@ -25,49 +19,51 @@ class WindowControl
   ensure
     STDIN.echo = true
     STDIN.cooked!
-
     return input
   end
 
-  def show_single_key
-    c = read_char
-
-    case c
+  def receive_key(index)
+    case read_char
     when "\r"
-      Util::openlink(@results[@index]["link"])
-    when "\e[A" #UP ARROW
-      if @index != 0
-        @index -= 1
-      end
-    when "\e[B" #DOWN ARROW
-      if @index != @results.length-1
-        @index += 1
-      end
-    when "\u0003", "\e"
-      exit 0
+      return "return"
+    when "\e[A"
+      return "up"
+    when "\e[B"
+      return "down"
+    when "\u0003", "\e", "q"
+      return "quit"
     end
-    Interface::render_page(@results, @index)
   end
 end
 
 
-class Interface
-  def self.render_page(results, index)
-   system "clear" or system "cls"
-   item = results[index]
-   puts "    ------------------<< Search Result #{index+1}  >>---------------".yellow
+class RenderPage
+  def self.page(name, *args, &block)
+    if args == []
+      define_method(name) do
+        system "clear" or system "cls"
+        yield
+      end
+    else
+      define_method(name) do | args |
+        system "clear" or system "cls"
+        yield(args)
+      end
+    end
+  end
+
+  page(:render_result, :item) do |item|
+   puts "    ------------------<< Search Result >>---------------".yellow
    puts
    puts " >> ".red+item["title"].upcase
    puts " >> ".red+item["link"].green
    puts " >> ".red+item["desc"]
- end
+  end
 
-  def self.prompt_user
+  page(:prompt_user) do
     google = "G".blue+"o".red+"o".yellow+"g".blue+"l".green+"e".red
-    system "clear" or system "cls"
     puts nil
     puts nil
-    puts "      #{google} Cli V.01"
-    print "      Enter Search Query"+" >> ".red
+    print "      #{google} Cli V.01 Enter Search Query "+">> ".red
   end
 end

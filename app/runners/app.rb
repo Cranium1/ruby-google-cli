@@ -1,7 +1,5 @@
 class Application
   def initialize(config={}, options={})
-    WindowControl::lock_window
-
     @options = options
     @config = config
 
@@ -10,25 +8,49 @@ class Application
   end
 
   def app_start
-    @query = Query::get_query(@options[:web])
-
+    @input = UserInput.new
+    @window = RenderPage.new
+    query = Query.new(@window).get_query(@options[:web])
     cache = QueryCache.new
-    
-    @results = QueryFetcher.new(@query, @config["google"], cache).results
+    fetcher = QueryFetcher.new(@config)
+
+    if !(@results = cache.get(query))
+      @results = fetcher.fetch_results(query)
+      cache.set(query, @results)
+    end
+
+    @input.lock_window
 
     if @options[:lucky]
       Util::openlink(@results[0]["link"])
-      exit 0
+      self.app_end
     end
+  end
 
-    @control = WindowControl.new(@results)
+  def app_end
+    STDIN.echo = true
+    STDIN.cooked!
+    @input.unlock_window
+    exit 0
   end
 
   def app_loop
-    while true
-      @control.show_single_key
+    @window.render_result(@results[0])
+    index = 0
+    loop do
+      key = @input.receive_key(index)
+      case key
+      when "return"
+        Util::openlink(@results[index]["link"])
+      when "up"
+        index -= 1 if index != 0
+      when "down"
+        index += 1 if index != @results.length-1
+      when "quit"
+        self.app_end
+      end
+      current_result = @results[index]
+      @window.render_result(current_result)
     end
-  ensure
-    WindowControl::unlock_window
   end
 end

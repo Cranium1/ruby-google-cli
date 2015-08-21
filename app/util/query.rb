@@ -1,25 +1,25 @@
 class Query
-	def self.get_query(webflag)
-		query = Query::get_query_from_arg
+	def initialize(render)
+		@render = render
+	end
+	def get_query(webflag)
+		query = self.get_query_from_arg
 		if webflag
-			WebSearch::browser_search(query)
+			Util::google_search(query)
+			exit 0
     	end
 		if query == ""
-      		query = Query::get_query_from_user
+      		query = self.get_query_from_user
    		end
    		query
 	end
-	def self.get_query_from_arg
+	def get_query_from_arg
 		ARGV.join("+")
 	end
 
-	def self.get_query_from_user
-		Interface::prompt_user
+	def get_query_from_user
+		@render.prompt_user
 		a = gets.chomp
 		a.split(" ").join("+")
-	end
-
-	def self.escape_query(query)
-		URI.escape(query.split(" ").join("+"))
 	end
 end
